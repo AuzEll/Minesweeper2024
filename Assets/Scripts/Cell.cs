@@ -2,18 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct Cell
-{
-    public enum Type
-    {
-        Empty,
-        Mine,
-        Number,
+public class Cell : MonoBehaviour {
+    //[SerializeField] private Color baseColor, offsetColor;
+    [SerializeField] private SpriteRenderer renderer;
+    [SerializeField] private GameObject highlight;
+ 
+    public void IsBackground() {
+        renderer.color = new Color(0.5f, 0.5f, 0.5f, 1f);
     }
-    public Type type;
-    public Vector3Int position;
-    public int number;
-    public bool revealed;
-    public bool flagged;
-    public bool exploded;
+ 
+    void OnMouseEnter() {
+        highlight.SetActive(true);
+        Debug.Log("yes");
+    }
+ 
+    void OnMouseExit()
+    {
+        highlight.SetActive(false);
+        Debug.Log("no");
+    }
 }

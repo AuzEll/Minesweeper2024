@@ -217,7 +217,7 @@ GameObject:
   - component: {fileID: 1988830374}
   - component: {fileID: 1988830373}
   m_Layer: 0
-  m_Name: Game
+  m_Name: Grid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -238,6 +238,8 @@ MonoBehaviour:
   width: 9
   height: 9
   mines: 10
+  tilePrefab: {fileID: 5864523230986035082, guid: be6536f53e2bc7244a0293fea5e1ba4a, type: 3}
+  cam: {fileID: 519420032}
 --- !u!4 &1988830374
 Transform:
   m_ObjectHideFlags: 0
