@@ -3,22 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Cell : MonoBehaviour {
-    //[SerializeField] private Color baseColor, offsetColor;
+    public Vector3Int cellValue;
+    public bool isBomb;
+
     [SerializeField] private SpriteRenderer renderer;
-    [SerializeField] private GameObject highlight;
  
-    public void IsBackground() {
-        renderer.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+    public void IsBackground(bool background) {
+        if (background) 
+        {
+            renderer.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+            this.GetComponent<BoxCollider2D>().enabled = false;
+        }
     }
- 
-    void OnMouseEnter() {
-        highlight.SetActive(true);
-        Debug.Log("yes");
-    }
- 
-    void OnMouseExit()
+
+    void OnMouseOver()
     {
-        highlight.SetActive(false);
-        Debug.Log("no");
+        if (Input.GetMouseButtonUp(0)) Destroy(this.gameObject);
+        if (Input.GetMouseButtonUp(1)) Debug.Log(this.name);
     }
 }

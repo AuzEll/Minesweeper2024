@@ -34,6 +34,7 @@ public class GridManager : MonoBehaviour
 
         GenerateGrid(true);
         GenerateGrid(false);
+        cam.transform.position = new Vector3((float)width/2 - 0.5f, (float)height/2 - 0.5f, -10);
     }
 
     // Update is called once per frame
@@ -65,11 +66,11 @@ public class GridManager : MonoBehaviour
             for (int y = 0; y < height; y++)
             {
                 var spawnedTile = Instantiate(tilePrefab, new Vector3(x, y), Quaternion.identity);
-                spawnedTile.name = "Tile (" + x + ", " + y + ")";
-                if (background) spawnedTile.IsBackground();
+                spawnedTile.IsBackground(background);
+                spawnedTile.name = background ? "Tile (" + x + ", " + y + ")" : "Cover (" + x + ", " + y + ")";
+                spawnedTile.transform.parent = transform;
             }
         }
 
-        cam.transform.position = new Vector3((float)width/2 - 0.5f, (float)height/2 - 0.5f, -10);
     }
 }
