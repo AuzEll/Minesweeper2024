@@ -7,16 +7,17 @@ public class GridManager : MonoBehaviour
     public int width = 9;
     public int height = 9;
     public int mines = 10;
-    public GameObject[,] grid;
+    public string[,] grid;
 
     [SerializeField] private Cell tilePrefab;
+    [SerializeField] private GameObject minePrefab;
     [SerializeField] private Transform cam;
     private int toBeRevealed;
 
     // Start is called before the first frame update
     void Start()
     {
-        grid = new GameObject[width, height];
+        grid = new string[width, height];
 
         toBeRevealed = width * height - mines;
 
@@ -33,30 +34,16 @@ public class GridManager : MonoBehaviour
         }
 
         GenerateGrid(true);
+        GenerateContents();
         GenerateGrid(false);
-        cam.transform.position = new Vector3((float)width/2 - 0.5f, (float)height/2 - 0.5f, -10);
+
+        cam.transform.position = new Vector3((float)width / 2 - 0.5f, (float)height / 2 - 0.5f, -10);
     }
 
     // Update is called once per frame
     void Update()
     {
-        
-    }
 
-    void PlaceMine()
-    {
-        int x = UnityEngine.Random.Range(0, width);
-        int y = UnityEngine.Random.Range(0, height);
-
-        if (grid[x, y] == null)
-        {
-            GameObject mine = new GameObject();
-            grid[x, y] = mine;
-        }
-        else
-        {
-            PlaceMine();
-        }
     }
 
     void GenerateGrid(bool background)
@@ -72,5 +59,36 @@ public class GridManager : MonoBehaviour
             }
         }
 
+    }
+
+    void GenerateContents()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (grid[x, y] != null && grid[x, y] == "Mine")
+                {
+                    var spawnedMine = Instantiate(minePrefab, new Vector3(x, y), Quaternion.identity);
+                    spawnedMine.name = "Mine";
+                    spawnedMine.transform.parent = transform;
+                }
+            }
+        }
+    }
+
+    void PlaceMine()
+    {
+        int x = UnityEngine.Random.Range(0, width);
+        int y = UnityEngine.Random.Range(0, height);
+
+        if (grid[x, y] == null)
+        {
+            grid[x, y] = "Mine";
+        }
+        else
+        {
+            PlaceMine();
+        }
     }
 }
