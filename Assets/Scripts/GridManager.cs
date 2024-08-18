@@ -133,12 +133,11 @@ public class GridManager : MonoBehaviour
             for (int y = 0; y < grid.GetLength(1); y++)
             {
                 GameObject coverTile = GameObject.Find("Cover (" + x + ", " + y + ")");
-                //Cell coverTileCell = GameObject.Find("Cover (" + x + ", " + y + ")").GetComponent<Cell>();
 
                 if (coverTile != null)
                 {
                     coverTile.GetComponent<BoxCollider2D>().enabled = false;
-                    if (grid[x, y] == "Mine") Destroy(coverTile);
+                    if (grid[x, y] == "Mine" && GameObject.Find("Flag (" + x + ", " + y + ")") == null) Destroy(coverTile);
                 }
             }
         }
