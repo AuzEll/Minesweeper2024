@@ -17,6 +17,7 @@ public class Cell : MonoBehaviour
             renderer.sortingOrder = -1;
             this.GetComponent<BoxCollider2D>().enabled = false;
         }
+        else renderer.sortingOrder = 1;
     }
 
     void OnMouseOver()

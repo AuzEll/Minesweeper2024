@@ -13,6 +13,7 @@ public class GridManager : MonoBehaviour
     [SerializeField] private GameObject minePrefab;
     [SerializeField] private Transform cam;
     private int toBeRevealed;
+    private bool exploded;
 
     // Start is called before the first frame update
     void Start()
@@ -20,6 +21,7 @@ public class GridManager : MonoBehaviour
         grid = new string[width, height];
 
         toBeRevealed = width * height - mines;
+        exploded = false;
 
         if (toBeRevealed < 0)
         {
@@ -27,10 +29,7 @@ public class GridManager : MonoBehaviour
         }
         else
         {
-            for (int i = 0; i < mines; i++)
-            {
-                PlaceMine();
-            }
+            for (int i = 0; i < mines; i++) PlaceMine();
         }
 
         GenerateGrid(true);
@@ -43,7 +42,15 @@ public class GridManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        //Check if bomb cover tile is revealed
+        for (int x = 0; x < grid.GetLength(0); x++)
+        {
+            for (int y = 0; y < grid.GetLength(1); y++)
+            {
+                GameObject coverTile = GameObject.Find("Cover (" + x + ", " + y + ")");
+                if (coverTile == null && grid[x, y] == "Mine" && !exploded) RevealMines();
+            }
+        }
     }
 
     void GenerateGrid(bool background)
@@ -90,5 +97,22 @@ public class GridManager : MonoBehaviour
         {
             PlaceMine();
         }
+    }
+
+    void RevealMines()
+    {
+        for (int x = 0; x < grid.GetLength(0); x++)
+        {
+            for (int y = 0; y < grid.GetLength(1); y++)
+            {
+                GameObject coverTile = GameObject.Find("Cover (" + x + ", " + y + ")");
+                if (coverTile != null)
+                {
+                    coverTile.GetComponent<BoxCollider2D>().enabled = false;
+                    if (grid[x, y] == "Mine") Destroy(coverTile);
+                }
+            }
+        }
+        exploded = true;
     }
 }
