@@ -11,9 +11,16 @@ public class GridManager : MonoBehaviour
 
     [SerializeField] private Cell tilePrefab;
     [SerializeField] private GameObject minePrefab;
+    [SerializeField] private GameObject flagPrefab;
     [SerializeField] private Transform cam;
     private int toBeRevealed;
     private bool exploded;
+    private int flags;
+    public int Flags
+    {
+        get { return flags; }
+        set { flags = value; }
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -22,6 +29,7 @@ public class GridManager : MonoBehaviour
 
         toBeRevealed = width * height - mines;
         exploded = false;
+        flags = mines;
 
         if (toBeRevealed < 0)
         {
@@ -99,6 +107,25 @@ public class GridManager : MonoBehaviour
         }
     }
 
+    public void PlaceRemoveFlag(int x, int y, bool hasFlag)
+    {
+        Cell coverTileCell = GameObject.Find("Cover (" + x + ", " + y + ")").GetComponent<Cell>();
+
+        if (!hasFlag && flags > 0)
+        {
+            var spawnedFlag = Instantiate(flagPrefab, new Vector3(x, y), Quaternion.identity);
+            spawnedFlag.name = "Flag (" + x + ", " + y + ")";
+            flags -= 1;
+            coverTileCell.HasFlag = !hasFlag;
+        }
+        else if (hasFlag)
+        {
+            Destroy(GameObject.Find("Flag (" + x + ", " + y + ")"));
+            flags += 1;
+            coverTileCell.HasFlag = !hasFlag;
+        }
+    }
+
     void RevealMines()
     {
         for (int x = 0; x < grid.GetLength(0); x++)
@@ -106,6 +133,8 @@ public class GridManager : MonoBehaviour
             for (int y = 0; y < grid.GetLength(1); y++)
             {
                 GameObject coverTile = GameObject.Find("Cover (" + x + ", " + y + ")");
+                //Cell coverTileCell = GameObject.Find("Cover (" + x + ", " + y + ")").GetComponent<Cell>();
+
                 if (coverTile != null)
                 {
                     coverTile.GetComponent<BoxCollider2D>().enabled = false;

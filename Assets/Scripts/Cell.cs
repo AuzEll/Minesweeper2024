@@ -8,6 +8,19 @@ public class Cell : MonoBehaviour
     public bool isBomb;
 
     [SerializeField] private SpriteRenderer renderer;
+    private GridManager gridObject;
+    private bool hasFlag;
+    public bool HasFlag
+    {
+        get { return hasFlag; }
+        set { hasFlag = value; }
+    }
+
+    void Start()
+    {
+        gridObject = GameObject.Find("Grid").GetComponent<GridManager>();
+        hasFlag = false;
+    }
 
     public void IsBackground(bool background)
     {
@@ -22,7 +35,12 @@ public class Cell : MonoBehaviour
 
     void OnMouseOver()
     {
-        if (Input.GetMouseButtonUp(0)) Destroy(this.gameObject);
-        if (Input.GetMouseButtonUp(1)) Debug.Log(this.name);
+        if (Input.GetMouseButtonUp(0) && !hasFlag) Destroy(this.gameObject);
+        if (Input.GetMouseButtonUp(1))
+        {
+            int x = (int)this.transform.position.x;
+            int y = (int)this.transform.position.y;
+            gridObject.PlaceRemoveFlag(x, y, hasFlag);
+        }
     }
 }
