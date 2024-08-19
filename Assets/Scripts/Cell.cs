@@ -4,11 +4,9 @@ using UnityEngine;
 
 public class Cell : MonoBehaviour
 {
-    public Vector3Int cellValue;
-    public bool isBomb;
-
     [SerializeField] private SpriteRenderer renderer;
     private GridManager gridObject;
+    private Vector2Int cellValue;
     private bool hasFlag;
     public bool HasFlag
     {
@@ -19,6 +17,7 @@ public class Cell : MonoBehaviour
     void Start()
     {
         gridObject = GameObject.Find("Grid").GetComponent<GridManager>();
+        cellValue = new Vector2Int((int)this.transform.position.x, (int)this.transform.position.y);
         hasFlag = false;
     }
 
@@ -40,7 +39,7 @@ public class Cell : MonoBehaviour
         {
             int x = (int)this.transform.position.x;
             int y = (int)this.transform.position.y;
-            gridObject.PlaceRemoveFlag(x, y, hasFlag);
+            gridObject.PlaceRemoveFlag(cellValue.x, cellValue.y, hasFlag);
         }
     }
 }
