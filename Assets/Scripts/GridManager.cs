@@ -23,6 +23,18 @@ public class GridManager : MonoBehaviour
         set { flags = value; }
     }
 
+    private Dictionary<int, Color> digitColours = new Dictionary<int, Color>()
+    {
+        { 1, new Color(0f, 0f, 1f, 1f) },
+        { 2, new Color(0f, 1f, 0f, 1f) },
+        { 3, new Color(1f, 0f, 0f, 1f) },
+        { 4, new Color(0f, 0f, 0.5f, 1f) },
+        { 5, new Color(0.5f, 0f, 0f, 1f) },
+        { 6, new Color(0.7f, 0.85f, 0.9f, 1f) },
+        { 7, new Color(0f, 0f, 0f, 0f) },
+        { 8, new Color(0f, 0f, 1f, 0.8f) }
+    };
+
     // Start is called before the first frame update
     void Start()
     {
@@ -109,6 +121,7 @@ public class GridManager : MonoBehaviour
                         GameObject backTile = GameObject.Find("Tile (" + x + ", " + y + ")");
                         TMP_Text backTileText = backTile.transform.FindChild("text").GetComponent<TMP_Text>();
                         backTileText.text = mineCount.ToString();
+                        backTileText.color = digitColours[mineCount];
                     }
                 }
             }
