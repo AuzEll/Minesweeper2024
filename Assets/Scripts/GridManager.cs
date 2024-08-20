@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class GridManager : MonoBehaviour
 {
     public int width = 9;
     public int height = 9;
     public int mines = 10;
-    public string[,] minesGrid;
+    public string[,] gridArray;
 
     [SerializeField] private Cell tilePrefab;
     [SerializeField] private GameObject minePrefab;
@@ -25,7 +26,7 @@ public class GridManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        minesGrid = new string[width, height];
+        gridArray = new string[width, height];
 
         toBeRevealed = width * height - mines;
         exploded = false;
@@ -51,12 +52,12 @@ public class GridManager : MonoBehaviour
     void Update()
     {
         //Check if bomb cover tile is revealed
-        for (int x = 0; x < minesGrid.GetLength(0); x++)
+        for (int x = 0; x < gridArray.GetLength(0); x++)
         {
-            for (int y = 0; y < minesGrid.GetLength(1); y++)
+            for (int y = 0; y < gridArray.GetLength(1); y++)
             {
                 GameObject coverTile = GameObject.Find("Cover (" + x + ", " + y + ")");
-                if (coverTile == null && minesGrid[x, y] == "Mine" && !exploded) RevealMines();
+                if (coverTile == null && gridArray[x, y] == "Mine" && !exploded) RevealMines();
             }
         }
     }
@@ -85,7 +86,7 @@ public class GridManager : MonoBehaviour
             for (int y = 0; y < height; y++)
             {
                 mineCount = 0;
-                if (minesGrid[x, y] == "Mine")
+                if (gridArray[x, y] == "Mine")
                 {
                     var spawnedMine = Instantiate(minePrefab, new Vector3(x, y), Quaternion.identity);
                     spawnedMine.name = "Mine";
@@ -93,15 +94,22 @@ public class GridManager : MonoBehaviour
                 }
                 else
                 {
-                    if (0 <= x - 1 && x - 1 <= width - 1 && 0 <= y && y <= height - 1 && minesGrid[x - 1, y] == "Mine") mineCount++;
-                    if (0 <= x - 1 && x - 1 <= width - 1 && 0 <= y - 1 && y - 1 <= height - 1 && minesGrid[x - 1, y - 1] == "Mine") mineCount++;
-                    if (0 <= x - 1 && x - 1 <= width - 1 && 0 <= y + 1 && y + 1 <= height - 1 && minesGrid[x - 1, y + 1] == "Mine") mineCount++;
-                    if (0 <= x && x <= width - 1 && 0 <= y - 1 && y - 1 <= height - 1 && minesGrid[x, y - 1] == "Mine") mineCount++;
-                    if (0 <= x && x <= width - 1 && 0 <= y + 1 && y + 1 <= height - 1 && minesGrid[x, y + 1] == "Mine") mineCount++;
-                    if (0 <= x + 1 && x + 1 <= width - 1 && 0 <= y && y <= height - 1 && minesGrid[x + 1, y] == "Mine") mineCount++;
-                    if (0 <= x + 1 && x + 1 <= width - 1 && 0 <= y - 1 && y - 1 <= height - 1 && minesGrid[x + 1, y - 1] == "Mine") mineCount++;
-                    if (0 <= x + 1 && x + 1 <= width - 1 && 0 <= y + 1 && y + 1 <= height - 1 && minesGrid[x + 1, y + 1] == "Mine") mineCount++;
-                    minesGrid[x, y] = mineCount.ToString();
+                    if (0 <= x - 1 && x - 1 <= width - 1 && 0 <= y && y <= height - 1 && gridArray[x - 1, y] == "Mine") mineCount++;
+                    if (0 <= x - 1 && x - 1 <= width - 1 && 0 <= y - 1 && y - 1 <= height - 1 && gridArray[x - 1, y - 1] == "Mine") mineCount++;
+                    if (0 <= x - 1 && x - 1 <= width - 1 && 0 <= y + 1 && y + 1 <= height - 1 && gridArray[x - 1, y + 1] == "Mine") mineCount++;
+                    if (0 <= x && x <= width - 1 && 0 <= y - 1 && y - 1 <= height - 1 && gridArray[x, y - 1] == "Mine") mineCount++;
+                    if (0 <= x && x <= width - 1 && 0 <= y + 1 && y + 1 <= height - 1 && gridArray[x, y + 1] == "Mine") mineCount++;
+                    if (0 <= x + 1 && x + 1 <= width - 1 && 0 <= y && y <= height - 1 && gridArray[x + 1, y] == "Mine") mineCount++;
+                    if (0 <= x + 1 && x + 1 <= width - 1 && 0 <= y - 1 && y - 1 <= height - 1 && gridArray[x + 1, y - 1] == "Mine") mineCount++;
+                    if (0 <= x + 1 && x + 1 <= width - 1 && 0 <= y + 1 && y + 1 <= height - 1 && gridArray[x + 1, y + 1] == "Mine") mineCount++;
+
+                    if (mineCount > 0)
+                    {
+                        gridArray[x, y] = mineCount.ToString();
+                        GameObject backTile = GameObject.Find("Tile (" + x + ", " + y + ")");
+                        TMP_Text backTileText = backTile.transform.FindChild("text").GetComponent<TMP_Text>();
+                        backTileText.text = mineCount.ToString();
+                    }
                 }
             }
         }
@@ -112,9 +120,9 @@ public class GridManager : MonoBehaviour
         int x = UnityEngine.Random.Range(0, width);
         int y = UnityEngine.Random.Range(0, height);
 
-        if (minesGrid[x, y] == null)
+        if (gridArray[x, y] == null)
         {
-            minesGrid[x, y] = "Mine";
+            gridArray[x, y] = "Mine";
         }
         else
         {
@@ -143,16 +151,16 @@ public class GridManager : MonoBehaviour
 
     void RevealMines()
     {
-        for (int x = 0; x < minesGrid.GetLength(0); x++)
+        for (int x = 0; x < gridArray.GetLength(0); x++)
         {
-            for (int y = 0; y < minesGrid.GetLength(1); y++)
+            for (int y = 0; y < gridArray.GetLength(1); y++)
             {
                 GameObject coverTile = GameObject.Find("Cover (" + x + ", " + y + ")");
 
                 if (coverTile != null)
                 {
                     coverTile.GetComponent<BoxCollider2D>().enabled = false;
-                    if (minesGrid[x, y] == "Mine" && GameObject.Find("Flag (" + x + ", " + y + ")") == null) Destroy(coverTile);
+                    if (gridArray[x, y] == "Mine" && GameObject.Find("Flag (" + x + ", " + y + ")") == null) Destroy(coverTile);
                 }
             }
         }
