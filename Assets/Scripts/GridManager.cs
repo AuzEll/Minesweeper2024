@@ -31,8 +31,8 @@ public class GridManager : MonoBehaviour
         { 4, new Color(0f, 0f, 0.5f, 1f) },
         { 5, new Color(0.5f, 0f, 0f, 1f) },
         { 6, new Color(0.7f, 0.85f, 0.9f, 1f) },
-        { 7, new Color(0f, 0f, 0f, 0f) },
-        { 8, new Color(0f, 0f, 1f, 0.8f) }
+        { 7, new Color(0f, 0f, 0f, 1f) },
+        { 8, new Color(1f, 1f, 1f, 0.8f) }
     };
 
     // Start is called before the first frame update
@@ -69,7 +69,12 @@ public class GridManager : MonoBehaviour
             for (int y = 0; y < gridArray.GetLength(1); y++)
             {
                 GameObject coverTile = GameObject.Find("Cover (" + x + ", " + y + ")");
-                if (coverTile == null && gridArray[x, y] == "Mine" && !exploded) RevealMines();
+                if (coverTile == null)
+                {
+                    if (gridArray[x, y] == null) ClearSurroundingTiles(x, y, gridArray.GetLength(0), gridArray.GetLength(1));
+
+                    if (gridArray[x, y] == "Mine" && !exploded) RevealMines();
+                }
             }
         }
     }
@@ -106,20 +111,22 @@ public class GridManager : MonoBehaviour
                 }
                 else
                 {
-                    if (0 <= x - 1 && x - 1 <= width - 1 && 0 <= y && y <= height - 1 && gridArray[x - 1, y] == "Mine") mineCount++;
-                    if (0 <= x - 1 && x - 1 <= width - 1 && 0 <= y - 1 && y - 1 <= height - 1 && gridArray[x - 1, y - 1] == "Mine") mineCount++;
-                    if (0 <= x - 1 && x - 1 <= width - 1 && 0 <= y + 1 && y + 1 <= height - 1 && gridArray[x - 1, y + 1] == "Mine") mineCount++;
-                    if (0 <= x && x <= width - 1 && 0 <= y - 1 && y - 1 <= height - 1 && gridArray[x, y - 1] == "Mine") mineCount++;
-                    if (0 <= x && x <= width - 1 && 0 <= y + 1 && y + 1 <= height - 1 && gridArray[x, y + 1] == "Mine") mineCount++;
-                    if (0 <= x + 1 && x + 1 <= width - 1 && 0 <= y && y <= height - 1 && gridArray[x + 1, y] == "Mine") mineCount++;
-                    if (0 <= x + 1 && x + 1 <= width - 1 && 0 <= y - 1 && y - 1 <= height - 1 && gridArray[x + 1, y - 1] == "Mine") mineCount++;
-                    if (0 <= x + 1 && x + 1 <= width - 1 && 0 <= y + 1 && y + 1 <= height - 1 && gridArray[x + 1, y + 1] == "Mine") mineCount++;
+                    if (0 <= x - 1 && gridArray[x - 1, y] == "Mine") mineCount++;
+                    if (0 <= x - 1 && 0 <= y - 1 && gridArray[x - 1, y - 1] == "Mine") mineCount++;
+                    if (0 <= x - 1 && y + 1 <= height - 1 && gridArray[x - 1, y + 1] == "Mine") mineCount++;
+                    if (0 <= y - 1 && gridArray[x, y - 1] == "Mine") mineCount++;
+                    if (y + 1 <= height - 1 && gridArray[x, y + 1] == "Mine") mineCount++;
+                    if (x + 1 <= width - 1 && gridArray[x + 1, y] == "Mine") mineCount++;
+                    if (x + 1 <= width - 1 && 0 <= y - 1 && gridArray[x + 1, y - 1] == "Mine") mineCount++;
+                    if (x + 1 <= width - 1 && y + 1 <= height - 1 && gridArray[x + 1, y + 1] == "Mine") mineCount++;
 
                     if (mineCount > 0)
                     {
                         gridArray[x, y] = mineCount.ToString();
+
                         GameObject backTile = GameObject.Find("Tile (" + x + ", " + y + ")");
                         TMP_Text backTileText = backTile.transform.FindChild("text").GetComponent<TMP_Text>();
+
                         backTileText.text = mineCount.ToString();
                         backTileText.color = digitColours[mineCount];
                     }
@@ -133,14 +140,35 @@ public class GridManager : MonoBehaviour
         int x = UnityEngine.Random.Range(0, width);
         int y = UnityEngine.Random.Range(0, height);
 
-        if (gridArray[x, y] == null)
-        {
-            gridArray[x, y] = "Mine";
-        }
-        else
-        {
-            PlaceMine();
-        }
+        if (gridArray[x, y] == null) gridArray[x, y] = "Mine";
+        else PlaceMine();
+    }
+
+    void ClearSurroundingTiles(int x, int y, int gridWidth, int gridHeight)
+    {
+        GameObject coverTile = GameObject.Find("Cover (" + (x - 1) + ", " + y + ")");
+        if (0 <= x - 1 && gridArray[x - 1, y] != "Mine" && coverTile != null) Destroy(coverTile);
+
+        coverTile = GameObject.Find("Cover (" + (x - 1) + ", " + (y - 1) + ")");
+        if (0 <= x - 1 && 0 <= y - 1 && gridArray[x - 1, y - 1] != "Mine" && coverTile != null) Destroy(coverTile);
+
+        coverTile = GameObject.Find("Cover (" + (x - 1) + ", " + (y + 1) + ")");
+        if (0 <= x - 1 && y + 1 <= height - 1 && gridArray[x - 1, y + 1] != "Mine" && coverTile != null) Destroy(coverTile);
+
+        coverTile = GameObject.Find("Cover (" + x + ", " + (y - 1) + ")");
+        if (0 <= y - 1 && gridArray[x, y - 1] != "Mine" && coverTile != null) Destroy(coverTile);
+
+        coverTile = GameObject.Find("Cover (" + x + ", " + (y + 1) + ")");
+        if (y + 1 <= gridHeight - 1 && gridArray[x, y + 1] != "Mine" && coverTile != null) Destroy(coverTile);
+
+        coverTile = GameObject.Find("Cover (" + (x + 1) + ", " + y + ")");
+        if (x + 1 <= gridWidth - 1 && gridArray[x + 1, y] != "Mine" && coverTile != null) Destroy(coverTile);
+
+        coverTile = GameObject.Find("Cover (" + (x + 1) + ", " + (y - 1) + ")");
+        if (x + 1 <= width - 1 && 0 <= y - 1 && gridArray[x + 1, y - 1] != "Mine" && coverTile != null) Destroy(coverTile);
+
+        coverTile = GameObject.Find("Cover (" + (x + 1) + ", " + (y + 1) + ")");
+        if (x + 1 <= width - 1 && y + 1 <= height - 1 && gridArray[x + 1, y + 1] != "Mine" && coverTile != null) Destroy(coverTile);
     }
 
     public void PlaceRemoveFlag(int x, int y, bool hasFlag)
