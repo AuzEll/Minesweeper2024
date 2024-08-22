@@ -58,16 +58,6 @@ public class GridManager : MonoBehaviour
         cam.transform.position = new Vector3((float)width / 2 - 0.5f, (float)height / 2 - 0.5f, -10);
     }
 
-    void firstClick(int x, int y)
-    {
-        if (toBeRevealed >= 1) for (int i = 0; i < mines; i++) PlaceMine(new Vector2(x, y));
-        //else if 
-        GenerateContents();
-        Debug.Log("true");
-
-        firstTileRemoved = true;
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -79,9 +69,9 @@ public class GridManager : MonoBehaviour
                 GameObject coverTile = GameObject.Find("Cover (" + x + ", " + y + ")");
                 if (coverTile == null)
                 {
-                    if (!firstTileRemoved) firstClick(x, y);
+                    if (!firstTileRemoved) GenerateContents(x, y);
 
-                    if (gridArray[x, y] == null) ClearSurroundingTiles(x, y, gridArray.GetLength(0), gridArray.GetLength(1));
+                    if (gridArray[x, y] == null) ClearSurroundingTiles(x, y);
 
                     if (gridArray[x, y] == "Mine" && !exploded) RevealMines();
                 }
@@ -104,15 +94,19 @@ public class GridManager : MonoBehaviour
 
     }
 
-    void GenerateContents()
+    void GenerateContents(int firstX, int firstY)
     {
-        int mineCount;
+        Dictionary<Vector2Int, string> adjacentTilesToFirst = checkAdjacentTiles(new Vector2Int(firstX, firstY));
 
-        for (int x = 0; x < width; x++)
+        if (toBeRevealed >= 9) for (int i = 0; i < mines; i++) PlaceMine(new Vector2Int(firstX, firstY), adjacentTilesToFirst);
+
+        for (int x = 0; x < gridArray.GetLength(0); x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < gridArray.GetLength(1); y++)
             {
-                mineCount = 0;
+                Dictionary<Vector2Int, string> adjacentTiles = checkAdjacentTiles(new Vector2Int(x, y));
+                int mineCount = 0;
+
                 if (gridArray[x, y] == "Mine")
                 {
                     var spawnedMine = Instantiate(minePrefab, new Vector3(x, y), Quaternion.identity);
@@ -121,14 +115,7 @@ public class GridManager : MonoBehaviour
                 }
                 else
                 {
-                    if (0 <= x - 1 && gridArray[x - 1, y] == "Mine") mineCount++;
-                    if (0 <= x - 1 && 0 <= y - 1 && gridArray[x - 1, y - 1] == "Mine") mineCount++;
-                    if (0 <= x - 1 && y + 1 <= height - 1 && gridArray[x - 1, y + 1] == "Mine") mineCount++;
-                    if (0 <= y - 1 && gridArray[x, y - 1] == "Mine") mineCount++;
-                    if (y + 1 <= height - 1 && gridArray[x, y + 1] == "Mine") mineCount++;
-                    if (x + 1 <= width - 1 && gridArray[x + 1, y] == "Mine") mineCount++;
-                    if (x + 1 <= width - 1 && 0 <= y - 1 && gridArray[x + 1, y - 1] == "Mine") mineCount++;
-                    if (x + 1 <= width - 1 && y + 1 <= height - 1 && gridArray[x + 1, y + 1] == "Mine") mineCount++;
+                    foreach (var adjacentTileValue in adjacentTiles.Values) if (adjacentTileValue == "Mine") mineCount++;
 
                     if (mineCount > 0)
                     {
@@ -143,43 +130,39 @@ public class GridManager : MonoBehaviour
                 }
             }
         }
+
+        firstTileRemoved = true;
     }
 
-    void PlaceMine(Vector2 cellToAvoid)
+    void PlaceMine(Vector2Int cellToAvoid, Dictionary<Vector2Int, string> adjacentsToAvoid)
     {
         int x = UnityEngine.Random.Range(0, gridArray.GetLength(0));
         int y = UnityEngine.Random.Range(0, gridArray.GetLength(1));
-        Vector2 thisCell = new Vector2(x, y);
+        Vector2Int thisCell = new Vector2Int(x, y);
 
-        if (gridArray[x, y] == null && thisCell != cellToAvoid) gridArray[x, y] = "Mine";
-        else PlaceMine(cellToAvoid);
+        // foreach (var cellToAvoid in cellsToAvoid) if (gridArray[x, y] == null && thisCell != cellToAvoid) gridArray[x, y] = "Mine";
+        // else PlaceMine(cellsToAvoid);
+
+        foreach (var adjacentToAvoid in adjacentsToAvoid.Keys)
+        {
+            //Debug.Log(thisCell);
+            //Debug.Log(cellToAvoid);
+            //Debug.Log(adjacentToAvoid);
+            //if (gridArray[x, y] == "Mine" || thisCell == cellToAvoid || thisCell == adjacentToAvoid) PlaceMine(cellToAvoid, adjacentsToAvoid);
+        }
+        if (gridArray[x, y] == "Mine" || thisCell == cellToAvoid) PlaceMine(cellToAvoid, adjacentsToAvoid);
+        else gridArray[x, y] = "Mine";
     }
 
-    void ClearSurroundingTiles(int x, int y, int gridWidth, int gridHeight)
+    void ClearSurroundingTiles(int x, int y)
     {
-        GameObject coverTile = GameObject.Find("Cover (" + (x - 1) + ", " + y + ")");
-        if (0 <= x - 1 && gridArray[x - 1, y] != "Mine" && coverTile != null) Destroy(coverTile);
+        Dictionary<Vector2Int, string> adjacentTiles = checkAdjacentTiles(new Vector2Int(x, y));
 
-        coverTile = GameObject.Find("Cover (" + (x - 1) + ", " + (y - 1) + ")");
-        if (0 <= x - 1 && 0 <= y - 1 && gridArray[x - 1, y - 1] != "Mine" && coverTile != null) Destroy(coverTile);
-
-        coverTile = GameObject.Find("Cover (" + (x - 1) + ", " + (y + 1) + ")");
-        if (0 <= x - 1 && y + 1 <= height - 1 && gridArray[x - 1, y + 1] != "Mine" && coverTile != null) Destroy(coverTile);
-
-        coverTile = GameObject.Find("Cover (" + x + ", " + (y - 1) + ")");
-        if (0 <= y - 1 && gridArray[x, y - 1] != "Mine" && coverTile != null) Destroy(coverTile);
-
-        coverTile = GameObject.Find("Cover (" + x + ", " + (y + 1) + ")");
-        if (y + 1 <= gridHeight - 1 && gridArray[x, y + 1] != "Mine" && coverTile != null) Destroy(coverTile);
-
-        coverTile = GameObject.Find("Cover (" + (x + 1) + ", " + y + ")");
-        if (x + 1 <= gridWidth - 1 && gridArray[x + 1, y] != "Mine" && coverTile != null) Destroy(coverTile);
-
-        coverTile = GameObject.Find("Cover (" + (x + 1) + ", " + (y - 1) + ")");
-        if (x + 1 <= width - 1 && 0 <= y - 1 && gridArray[x + 1, y - 1] != "Mine" && coverTile != null) Destroy(coverTile);
-
-        coverTile = GameObject.Find("Cover (" + (x + 1) + ", " + (y + 1) + ")");
-        if (x + 1 <= width - 1 && y + 1 <= height - 1 && gridArray[x + 1, y + 1] != "Mine" && coverTile != null) Destroy(coverTile);
+        foreach (var adjacentTile in adjacentTiles)
+        {
+            GameObject coverTile = GameObject.Find("Cover (" + adjacentTile.Key.x + ", " + adjacentTile.Key.y + ")");
+            if (adjacentTile.Value != "Mine" && coverTile != null) Destroy(coverTile);
+        }
     }
 
     public void PlaceRemoveFlag(int x, int y, bool hasFlag)
@@ -217,5 +200,36 @@ public class GridManager : MonoBehaviour
             }
         }
         exploded = true;
+    }
+
+    Dictionary<Vector2Int, string> checkAdjacentTiles(Vector2Int tile)
+    {
+        Dictionary<Vector2Int, string> adjacentTiles = new Dictionary<Vector2Int, string>();
+
+        if (0 <= tile.x - 1) adjacentTiles[new Vector2Int(tile.x - 1, tile.y)] = gridArray[tile.x - 1, tile.y];
+        else adjacentTiles[new Vector2Int(tile.x - 1, tile.y)] = "OOB";
+
+        if (0 <= tile.x - 1 && 0 <= tile.y - 1) adjacentTiles[new Vector2Int(tile.x - 1, tile.y - 1)] = gridArray[tile.x - 1, tile.y - 1];
+        else adjacentTiles[new Vector2Int(tile.x - 1, tile.y - 1)] = "OOB";
+
+        if (0 <= tile.x - 1 && tile.y + 1 < gridArray.GetLength(1)) adjacentTiles[new Vector2Int(tile.x - 1, tile.y + 1)] = gridArray[tile.x - 1, tile.y + 1];
+        else adjacentTiles[new Vector2Int(tile.x - 1, tile.y + 1)] = "OOB";
+
+        if (0 <= tile.y - 1) adjacentTiles[new Vector2Int(tile.x, tile.y - 1)] = gridArray[tile.x, tile.y - 1];
+        else adjacentTiles[new Vector2Int(tile.x, tile.y - 1)] = "OOB";
+
+        if (tile.y + 1 < gridArray.GetLength(1)) adjacentTiles[new Vector2Int(tile.x, tile.y + 1)] = gridArray[tile.x, tile.y + 1];
+        else adjacentTiles[new Vector2Int(tile.x, tile.y + 1)] = "OOB";
+
+        if (tile.x + 1 < gridArray.GetLength(0)) adjacentTiles[new Vector2Int(tile.x + 1, tile.y)] = gridArray[tile.x + 1, tile.y];
+        else adjacentTiles[new Vector2Int(tile.x + 1, tile.y)] = "OOB";
+
+        if (tile.x + 1 < gridArray.GetLength(0) && 0 <= tile.y - 1) adjacentTiles[new Vector2Int(tile.x + 1, tile.y - 1)] = gridArray[tile.x + 1, tile.y - 1];
+        else adjacentTiles[new Vector2Int(tile.x + 1, tile.y - 1)] = "OOB";
+
+        if (tile.x + 1 < gridArray.GetLength(0) && tile.y + 1 < gridArray.GetLength(1)) adjacentTiles[new Vector2Int(tile.x + 1, tile.y + 1)] = gridArray[tile.x + 1, tile.y + 1];
+        else adjacentTiles[new Vector2Int(tile.x + 1, tile.y + 1)] = "OOB";
+
+        return adjacentTiles;
     }
 }
