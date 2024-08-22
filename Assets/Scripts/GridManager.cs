@@ -16,6 +16,7 @@ public class GridManager : MonoBehaviour
     [SerializeField] private Transform cam;
     private int toBeRevealed;
     private bool exploded;
+    private bool firstTileRemoved;
     private int flags;
     public int Flags
     {
@@ -36,28 +37,35 @@ public class GridManager : MonoBehaviour
     };
 
     // Start is called before the first frame update
-    void Start()
+    public void Start()
     {
         gridArray = new string[width, height];
 
         toBeRevealed = width * height - mines;
         exploded = false;
+        firstTileRemoved = false;
         flags = mines;
 
         if (toBeRevealed < 0)
         {
             Debug.Log("ERROR: There are more mines than cells in the grid");
         }
-        else
-        {
-            for (int i = 0; i < mines; i++) PlaceMine();
-        }
 
         GenerateGridLayer(true);
-        GenerateContents();
+        //GenerateContents();
         GenerateGridLayer(false);
 
         cam.transform.position = new Vector3((float)width / 2 - 0.5f, (float)height / 2 - 0.5f, -10);
+    }
+
+    void firstClick(int x, int y)
+    {
+        if (toBeRevealed >= 1) for (int i = 0; i < mines; i++) PlaceMine(new Vector2(x, y));
+        //else if 
+        GenerateContents();
+        Debug.Log("true");
+
+        firstTileRemoved = true;
     }
 
     // Update is called once per frame
@@ -71,6 +79,8 @@ public class GridManager : MonoBehaviour
                 GameObject coverTile = GameObject.Find("Cover (" + x + ", " + y + ")");
                 if (coverTile == null)
                 {
+                    if (!firstTileRemoved) firstClick(x, y);
+
                     if (gridArray[x, y] == null) ClearSurroundingTiles(x, y, gridArray.GetLength(0), gridArray.GetLength(1));
 
                     if (gridArray[x, y] == "Mine" && !exploded) RevealMines();
@@ -135,13 +145,14 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    void PlaceMine()
+    void PlaceMine(Vector2 cellToAvoid)
     {
-        int x = UnityEngine.Random.Range(0, width);
-        int y = UnityEngine.Random.Range(0, height);
+        int x = UnityEngine.Random.Range(0, gridArray.GetLength(0));
+        int y = UnityEngine.Random.Range(0, gridArray.GetLength(1));
+        Vector2 thisCell = new Vector2(x, y);
 
-        if (gridArray[x, y] == null) gridArray[x, y] = "Mine";
-        else PlaceMine();
+        if (gridArray[x, y] == null && thisCell != cellToAvoid) gridArray[x, y] = "Mine";
+        else PlaceMine(cellToAvoid);
     }
 
     void ClearSurroundingTiles(int x, int y, int gridWidth, int gridHeight)
