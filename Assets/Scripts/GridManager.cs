@@ -98,7 +98,7 @@ public class GridManager : MonoBehaviour
     {
         Dictionary<Vector2Int, string> adjacentTilesToFirst = checkAdjacentTiles(new Vector2Int(firstX, firstY));
 
-        if (toBeRevealed >= 9) for (int i = 0; i < mines; i++) PlaceMine(new Vector2Int(firstX, firstY), adjacentTilesToFirst);
+        for (int i = 0; i < mines; i++) PlaceMine(new Vector2Int(firstX, firstY), adjacentTilesToFirst);
 
         for (int x = 0; x < gridArray.GetLength(0); x++)
         {
@@ -136,22 +136,33 @@ public class GridManager : MonoBehaviour
 
     void PlaceMine(Vector2Int cellToAvoid, Dictionary<Vector2Int, string> adjacentsToAvoid)
     {
+        int oobs = 0;
         int x = UnityEngine.Random.Range(0, gridArray.GetLength(0));
         int y = UnityEngine.Random.Range(0, gridArray.GetLength(1));
         Vector2Int thisCell = new Vector2Int(x, y);
 
-        // foreach (var cellToAvoid in cellsToAvoid) if (gridArray[x, y] == null && thisCell != cellToAvoid) gridArray[x, y] = "Mine";
-        // else PlaceMine(cellsToAvoid);
+        foreach (var value in adjacentsToAvoid.Values) if (value == "OOB") oobs++;
 
-        foreach (var adjacentToAvoid in adjacentsToAvoid.Keys)
+        if (toBeRevealed >= 9 || (toBeRevealed >= 6 && oobs == 3) || (toBeRevealed >= 4 && oobs == 5))
         {
-            //Debug.Log(thisCell);
-            //Debug.Log(cellToAvoid);
-            //Debug.Log(adjacentToAvoid);
-            //if (gridArray[x, y] == "Mine" || thisCell == cellToAvoid || thisCell == adjacentToAvoid) PlaceMine(cellToAvoid, adjacentsToAvoid);
+            while (adjacentsToAvoid.ContainsKey(thisCell) || thisCell == cellToAvoid || gridArray[x, y] == "Mine")
+            {
+                x = UnityEngine.Random.Range(0, gridArray.GetLength(0));
+                y = UnityEngine.Random.Range(0, gridArray.GetLength(1));
+                thisCell = new Vector2Int(x, y);
+            }
         }
-        if (gridArray[x, y] == "Mine" || thisCell == cellToAvoid) PlaceMine(cellToAvoid, adjacentsToAvoid);
-        else gridArray[x, y] = "Mine";
+        else
+        {
+            while (thisCell == cellToAvoid || gridArray[x, y] == "Mine")
+            {
+                x = UnityEngine.Random.Range(0, gridArray.GetLength(0));
+                y = UnityEngine.Random.Range(0, gridArray.GetLength(1));
+                thisCell = new Vector2Int(x, y);
+            }
+        }
+
+        gridArray[x, y] = "Mine";
     }
 
     void ClearSurroundingTiles(int x, int y)
