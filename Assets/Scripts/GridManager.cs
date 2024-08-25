@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 public class GridManager : MonoBehaviour
@@ -13,10 +14,18 @@ public class GridManager : MonoBehaviour
     [SerializeField] private Cell tilePrefab;
     [SerializeField] private GameObject minePrefab;
     [SerializeField] private GameObject flagPrefab;
+    [SerializeField] private Text flagCounter;
+    [SerializeField] private Text timerDisplay;
     [SerializeField] private Transform cam;
-    private int toBeRevealed;
     private bool exploded;
     private bool firstTileRemoved;
+    private float timer;
+    private int toBeRevealed;
+    public int ToBeRevealed
+    {
+        get { return toBeRevealed; }
+        set { toBeRevealed = value; }
+    }
     private int flags;
     public int Flags
     {
@@ -46,6 +55,7 @@ public class GridManager : MonoBehaviour
         toBeRevealed = width * height - mines;
         exploded = false;
         firstTileRemoved = false;
+        timer = 0;
         flags = mines;
 
         foreach (GameObject tile in GameObject.FindGameObjectsWithTag("Tile")) Destroy(tile);
@@ -84,6 +94,14 @@ public class GridManager : MonoBehaviour
                 }
             }
         }
+
+        flagCounter.text = flags.ToString("000");
+
+        if (firstTileRemoved && !exploded && toBeRevealed > 0)
+        {
+            if (timer < 999) timer += Time.deltaTime % 60;
+        }
+        timerDisplay.text = timer.ToString("000");
     }
 
     void GenerateGridLayer(bool background)
@@ -98,7 +116,6 @@ public class GridManager : MonoBehaviour
                 spawnedTile.transform.parent = transform;
             }
         }
-
     }
 
     void GenerateContents(int firstX, int firstY)
@@ -179,7 +196,11 @@ public class GridManager : MonoBehaviour
         foreach (var adjacentTile in adjacentTiles)
         {
             GameObject coverTile = GameObject.Find("Cover (" + adjacentTile.Key.x + ", " + adjacentTile.Key.y + ")");
-            if (adjacentTile.Value != "Mine" && coverTile != null) Destroy(coverTile);
+            if (adjacentTile.Value != "Mine" && coverTile != null)
+            {
+                Destroy(coverTile);
+                toBeRevealed -= 1;
+            }
         }
     }
 

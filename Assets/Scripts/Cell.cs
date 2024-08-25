@@ -34,7 +34,12 @@ public class Cell : MonoBehaviour
 
     void OnMouseOver()
     {
-        if (Input.GetMouseButtonUp(0) && !hasFlag) Destroy(this.gameObject);
+        if (Input.GetMouseButtonUp(0) && !hasFlag)
+        {
+            Destroy(this.gameObject);
+            gridObject.ToBeRevealed -= 1;
+        }
+
         if (Input.GetMouseButtonUp(1))
         {
             int x = (int)this.transform.position.x;
