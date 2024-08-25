@@ -24,6 +24,8 @@ public class GridManager : MonoBehaviour
         set { flags = value; }
     }
 
+    private const float cameraZoomMultiplier = 11f / 16f;
+
     private Dictionary<int, Color> digitColours = new Dictionary<int, Color>()
     {
         { 1, new Color(0f, 0f, 1f, 1f) },
@@ -46,16 +48,21 @@ public class GridManager : MonoBehaviour
         firstTileRemoved = false;
         flags = mines;
 
+        foreach (GameObject tile in GameObject.FindGameObjectsWithTag("Tile")) Destroy(tile);
+        foreach (GameObject tile in GameObject.FindGameObjectsWithTag("Mine")) Destroy(tile);
+        foreach (GameObject tile in GameObject.FindGameObjectsWithTag("Flag")) Destroy(tile);
+
+        GenerateGridLayer(true);
+        GenerateGridLayer(false);
+
         if (toBeRevealed < 0)
         {
             Debug.Log("ERROR: There are more mines than cells in the grid");
+            foreach (GameObject tile in GameObject.FindGameObjectsWithTag("Tile")) tile.GetComponent<BoxCollider2D>().enabled = false;
         }
 
-        GenerateGridLayer(true);
-        //GenerateContents();
-        GenerateGridLayer(false);
-
-        cam.transform.position = new Vector3((float)width / 2 - 0.5f, (float)height / 2 - 0.5f, -10);
+        cam.transform.position = new Vector3((float)width / 2 - 0.5f, (float)height / 2, -10);
+        cam.GetComponent<Camera>().orthographicSize = (float)height * cameraZoomMultiplier;
     }
 
     // Update is called once per frame
