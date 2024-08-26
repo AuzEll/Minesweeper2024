@@ -25,23 +25,21 @@ public class ReadInput : MonoBehaviour
 
     }
 
-    public void ReadWidthInput(int input)
+    public void ReadWidthInput(InputField input)
     {
-        //widthInput = int.Parse(input.text);
-        //input = s;
-        Debug.Log(input);
-        //gridObject.width = widthInput;
+        widthInput = int.Parse(input.text);
+        gridObject.width = widthInput;
     }
 
-    public void ReadHeightInput(int s)
+    public void ReadHeightInput(InputField input)
     {
-        //heightInput = Int32.Parse(s);
-        //gridObject.height = heightInput;
+        heightInput = int.Parse(input.text);
+        gridObject.height = heightInput;
     }
 
-    public void ReadMinesInput(int s)
+    public void ReadMinesInput(InputField input)
     {
-        //minesInput = Int32.Parse(s);
-        //gridObject.mines = minesInput;
+        minesInput = int.Parse(input.text);
+        gridObject.mines = minesInput;
     }
 }

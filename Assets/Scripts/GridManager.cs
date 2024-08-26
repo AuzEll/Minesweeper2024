@@ -101,6 +101,7 @@ public class GridManager : MonoBehaviour
         {
             if (timer < 999) timer += Time.deltaTime % 60;
         }
+        //Debug.Log(toBeRevealed);
         timerDisplay.text = timer.ToString("000");
     }
 
