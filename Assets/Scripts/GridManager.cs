@@ -21,11 +21,6 @@ public class GridManager : MonoBehaviour
     private bool firstTileRemoved;
     private float timer;
     private int toBeRevealed;
-    public int ToBeRevealed
-    {
-        get { return toBeRevealed; }
-        set { toBeRevealed = value; }
-    }
     private int flags;
     public int Flags
     {
@@ -78,6 +73,8 @@ public class GridManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        int mineCount = 0;
+        int coverCount = 0;
         //Check if bomb cover tile is revealed
         for (int x = 0; x < gridArray.GetLength(0); x++)
         {
@@ -92,8 +89,12 @@ public class GridManager : MonoBehaviour
 
                     if (gridArray[x, y] == "Mine" && !exploded) RevealMines();
                 }
+                else coverCount++;
+
+                if (gridArray[x, y] == "Mine") mineCount++;
             }
         }
+        toBeRevealed = coverCount - mineCount;
 
         flagCounter.text = flags.ToString("000");
 
@@ -101,7 +102,6 @@ public class GridManager : MonoBehaviour
         {
             if (timer < 999) timer += Time.deltaTime % 60;
         }
-        //Debug.Log(toBeRevealed);
         timerDisplay.text = timer.ToString("000");
     }
 
@@ -200,7 +200,7 @@ public class GridManager : MonoBehaviour
             if (adjacentTile.Value != "Mine" && coverTile != null)
             {
                 Destroy(coverTile);
-                toBeRevealed -= 1;
+                //toBeRevealed -= 1;
             }
         }
     }

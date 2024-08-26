@@ -37,7 +37,6 @@ public class Cell : MonoBehaviour
         if (Input.GetMouseButtonUp(0) && !hasFlag)
         {
             Destroy(this.gameObject);
-            gridObject.ToBeRevealed -= 1;
         }
 
         if (Input.GetMouseButtonUp(1))
